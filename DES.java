@@ -112,7 +112,7 @@ public class DES {
         return new Pair<>(subKey, nextKey);
     }
 
-    private static long expansionPermutation(long text, long subKey, int[][] sKey) {
+    private static long expansionPermutation(long text, long subKey) {
         long left = text >>> 32;
         long right = text & 0xffffffff;
         long newRight = map(right, E) ^ subKey;
@@ -121,9 +121,9 @@ public class DES {
         long newnewright = 0;
         for (int i = 0; i < 8; i++) {
             long mini = newRight & mask;
-            long inner = mini & 0x1E;
+            long inner = (mini & 0x1E) >>> 1;
             long outer = (mini & 1) | ((mini & 0x20) >>> 4);
-            long rez = sKey[(int) inner][(int) outer];
+            long rez = S[i][(int) outer][(int) inner];
             newnewright = newnewright | (rez << (i * 4));
             mask = mask << 6;
         }
@@ -140,7 +140,7 @@ public class DES {
         for (int i = 0; i < leftShifts.length; i++) {
             Pair<Long, Long> keyOutput = keyExpansion(key, leftShifts[i]);
 
-            text = expansionPermutation(text, keyOutput.first, S[i]);
+            text = expansionPermutation(text, keyOutput.first);
             key = keyOutput.second;
         }
 
