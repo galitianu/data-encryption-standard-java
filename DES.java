@@ -1,3 +1,13 @@
+class Pair<A, B> {
+    public A first;
+    public B second;
+
+    public Pair(A a, B b) {
+        this.first = a;
+        this.second = b;
+    }
+}
+
 public class DES {
 
     static int[] IP = { 58, 50, 42, 34, 26, 18, 10, 2, 60, 52, 44, 36, 28, 20, 12, 4, 62, 54, 46, 38, 30, 22, 14, 6, 64,
@@ -26,8 +36,17 @@ public class DES {
         return map(plaintext, IP);
     }
 
-    private static long compressionPermutation(long key) {
-        return map(key, PC1);
+    private static Pair<Long, Long> keyExpansion(long key, int shift) {
+        long compressed = map(key, PC1);
+        long h1 = Long.rotateLeft(compressed >>> 28, shift);
+        long h2 = Long.rotateLeft(compressed & 0xfffffff, shift);
+        System.out.println("Key" + Long.toHexString(h1));
+        System.out.println("Key" + Long.toHexString(h2));
+
+        long subKey = map((h1 << 28) | h2, PC2);
+        System.out.println(Long.toHexString(subKey));
+        long nextKey = (h1 << 28) | h2;
+        return new Pair<>(subKey, nextKey);
     }
 
     // static long removeBit(long x, int i) {
@@ -57,10 +76,14 @@ public class DES {
         long key = Long.parseUnsignedLong("3b3898371520f75e", 16);
 
         initialPermutation(plaintext);
-        System.out.println(Long.toHexString(compressionPermutation(key)));
+        System.out.println(Long.toHexString(map(key, PC1)));
+        keyExpansion(key, 1);
     }
 }
 
 // 0011101100111000100110000011011100010101001000001111011101011110
 // 0111011 0111000 0011000 0110111 0010101 0100000 1110111 1011110
 // 0111011 0111000 0011000 0110111 0010101 0100000 1110111 1011110
+// 8df6bc07d8c959
+// 1111101100011001001010110010
+// 0111110110001100100101011001
