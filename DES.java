@@ -129,7 +129,7 @@ public class DES {
         }
 
         newnewright = map(newnewright, P) ^ left;
-        return (left << 32) | newnewright;
+        return (newnewright << 32) | left;
     }
 
     public static void main(String[] args) {
@@ -137,15 +137,19 @@ public class DES {
         long key = Long.parseUnsignedLong("3b3898371520f75e", 16);
 
         long text = initialPermutation(plaintext);
-        for (int i = 0; i < leftShifts.length; i++) {
+        System.out.println("After initial permutation: " + Long.toHexString(text));
+
+        for (int i = 0; i < 16; i++) {
             Pair<Long, Long> keyOutput = keyExpansion(key, leftShifts[i]);
 
             text = expansionPermutation(text, keyOutput.first);
+            System.out.println(
+                    "Round " + (i + 1) + ": " + Long.toHexString(text) + "\nKey: " + Long.toHexString(key) + "\n\n");
             key = keyOutput.second;
         }
-
+        text = (text << 32) | (text >>> 32);
         text = finalPermutation(text);
 
-        System.out.println(Long.toHexString(text));
+        System.out.println("Final form: " + Long.toHexString(text));
     }
 }
