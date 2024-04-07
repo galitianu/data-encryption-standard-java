@@ -170,19 +170,20 @@ public class DES {
         long right = text & 0xffffffffL;
         long newRight = permuteKey(right, 32, E) ^ subKey;
 
-        long mask = 0x3F;
-        long newnewright = 0;
+        long mask = 0xFC0000000000L;
+        long newNewRight = 0;
         for (int i = 0; i < 8; i++) {
-            long mini = (newRight & mask) >>> (i * 6);
-            long inner = (mini & 0x1E) >>> 1;
-            long outer = (mini & 1) | ((mini & 0x20) >>> 4);
-            long rez = S[i][(int) outer][(int) inner];
-            newnewright = newnewright | (rez << (i * 4));
-            mask = mask << 6;
+            long mini = (newRight & mask) >>> (42 - i * 6);
+            int outer = (int) ((mini & 0x20) >>> 4) | (int) (mini & 0x01);
+            int inner = (int) (mini & 0x1E) >>> 1;
+
+            long rez = S[i][outer][inner];
+            newNewRight |= (rez << ((7 - i) * 4));
+            mask >>>= 6;
         }
 
-        newnewright = permuteKey(newnewright, 32, P);
-        return (right << 32) | (left ^ newnewright);
+        newNewRight = permuteKey(newNewRight, 32, P);
+        return (right << 32) | (left ^ newNewRight);
     }
 
     public static void main(String[] args) {
@@ -202,6 +203,7 @@ public class DES {
             key = keyOutput.second;
         }
 
+        text = (text << 32) | (text >>> 32);
         text = finalPermutation(text);
 
         System.out.println("Final form: " + Long.toHexString(text));
